@@ -14,7 +14,8 @@ module.exports = {
     .setDescription("Moderate a selected member!")
     .setDefaultMemberPermissions(
       PermissionFlagsBits.KickMembers,
-      PermissionFlagsBits.BanMembers
+      PermissionFlagsBits.BanMembers,
+      PermissionFlagsBits.ModerateMembers
     )
     .addSubcommand((subcommand) =>
       subcommand
