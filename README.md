@@ -7,6 +7,12 @@ A DJS moderation system that every server needs, full with ban, kick, and timeou
 -  chalk => `npm i chalk@4.1.2`
 -  dotenv => `npm i dotenv`
 
+# CHANGELOG #1
+- Fixed no perms to send message in channel error
+- Fixed cannot create modlogs
+- Fixed unknown interaction
+- Fixed Missing Permisson when trying to kick or ban someone
+
 # Instructions:
 1) Place the command into your commands folder.
 2) Create a new folder in the bot root direcatory and name it "schemas", and than place the schema in there.
