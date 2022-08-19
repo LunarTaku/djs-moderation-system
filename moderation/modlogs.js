@@ -53,11 +53,11 @@ module.exports = {
     if (getSubCommand === "setup") {
       const { options } = interaction;
       const channel = options.getChannel("channel");
-      const modSys = modSchema.findOne({
+      const modSys = await modSchema.findOne({
         guildId: interaction.guild.id,
       })
   
-      if(modSys) {
+      if(modSys === interaction.guild.id) {
         interaction.reply({
           content: "Modlogs are already setup!",
         })
