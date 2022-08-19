@@ -34,7 +34,7 @@ A DJS moderation system that every server needs, full with ban, kick, and timeou
 # Preview
 
 ### ModLogs for kicks
-![Preview1]![image](https://user-images.githubusercontent.com/91988772/185661831-8bd66a19-c44a-4d35-9390-7c26077aee47.png)
+![image](https://user-images.githubusercontent.com/91988772/185661831-8bd66a19-c44a-4d35-9390-7c26077aee47.png)
 ### ModLogs for bans
 ![image](https://user-images.githubusercontent.com/91988772/185662141-87a9799d-3124-450d-a383-2a53f8830726.png)
 ### ModLogs for timeouts
