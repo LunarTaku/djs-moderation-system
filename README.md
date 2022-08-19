@@ -6,7 +6,6 @@ A DJS moderation system that every server needs, full with ban, kick, and timeou
 -  mongoose => `npm i mongoose`
 -  chalk => `npm i chalk@4.1.2`
 -  dotenv => `npm i dotenv`
-- discord-html-transcripts => `npm i discord-html-transcripts`
 
 # Instructions:
 1) Place the command into your commands folder.
