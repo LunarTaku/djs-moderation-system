@@ -76,6 +76,7 @@ module.exports = {
       const user = interaction.options.getUser("target");
       const target = interaction.options.getMember("target");
       let reason = interaction.options.getString("reason");
+      const modSys = await modSchema.findOne({ guildId: interaction.guild.id });
       const member = await interaction.guild.members
         .fetch(user.id)
         .catch((err) => console.log(err));
@@ -137,6 +138,20 @@ module.exports = {
         return;
       }
 
+      if (!member.kickable) {
+        interaction.reply({
+          embeds: [
+            new EmbedBuilder()
+              .setColor("Red")
+              .setDescription(
+                "That member is higher than my role, or i don't have permissions to kick them."
+              ),
+          ],
+          ephemeral: true,
+        });
+        return;
+      }
+
       const userEmbed = new EmbedBuilder()
         .setTitle(`You have been kicked from ${interaction.guild.name}`)
         .addFields(
@@ -158,9 +173,9 @@ module.exports = {
         .setColor("Red")
         .setTimestamp();
 
-        await interaction.deferReply({
-          ephemeral: true,
-        });
+      await interaction.deferReply({
+        ephemeral: true,
+      });
 
       await user
         .send({
@@ -181,9 +196,59 @@ module.exports = {
 
       await member.kick(reason).catch((err) => console.log(err));
 
-      const modSys = await modSchema.findOne({ guildId: interaction.guild.id });
+      await interaction.followUp({
+        embeds: [
+          new EmbedBuilder()
+            .setColor("Green")
+            .setTitle(`${user.username} has been kicked.`)
+            .addFields(
+              {
+                name: "user",
+                value: user.username,
+              },
+              {
+                name: "reason",
+                value: reason,
+              }
+            ),
+        ],
+        ephemeral: true,
+      });
 
-      if (modSys.channelId) {
+      if (
+        !interaction.guild.members.me
+          .permissionsIn(modSys.channelId)
+          .has(["EmbedLinks", "SendMessages", "ViewChannel"])
+      ) {
+        interaction.user.send({
+          embeds: [
+            new EmbedBuilder()
+              .setDescription(
+                "I do not have permissions to access that channel.\nPlease add me to the channel and give me permissions!"
+              )
+              .addFields(
+                {
+                  name: "Channel:",
+                  value: `<${modSys.channelId}>`,
+                },
+                {
+                  name: "Required Permissions",
+                  value: "`EmbedLinks, ViewChannel, and SendMessages`",
+                }
+              ),
+          ],
+        });
+
+        await interaction.followUp({
+          content: "Message not sent in logs channel because of an error.",
+          ephemeral: true,
+        });
+        return;
+      } 
+      if (modSys.channelId &&
+        interaction.guild.members.me
+          .permissionsIn(modSys.channelId)
+          .has(["EmbedLinks", "SendMessages", "ViewChannel"])) {
         const channel = interaction.guild.channels.cache.get(modSys.channelId);
 
         if (channel) {
@@ -222,29 +287,11 @@ module.exports = {
           });
         }
       }
-
-      await interaction.followUp({
-        embeds: [
-          new EmbedBuilder()
-            .setColor("Green")
-            .setTitle(`${user.username} has been kicked.`)
-            .addFields(
-              {
-                name: "user",
-                value: user.username,
-              },
-              {
-                name: "reason",
-                value: reason,
-              }
-            ),
-        ],
-        ephemeral: true,
-      });
     } else if (interaction.options.getSubcommand() === "ban") {
       const user = interaction.options.getUser("target");
       const target = interaction.options.getMember("target");
       let reason = interaction.options.getString("reason");
+      const modSys = await modSchema.findOne({ guildId: interaction.guild.id });
       const member = await interaction.guild.members
         .fetch(user.id)
         .catch((err) => console.log(err));
@@ -259,6 +306,20 @@ module.exports = {
             new EmbedBuilder()
               .setColor("Yellow")
               .setDescription("You cannot ban yourself dummy."),
+          ],
+          ephemeral: true,
+        });
+        return;
+      }
+
+      if (!member.bannable) {
+        interaction.reply({
+          embeds: [
+            new EmbedBuilder()
+              .setColor("Red")
+              .setDescription(
+                "That member is higher than my role, or i don't have permissions to ban them."
+              ),
           ],
           ephemeral: true,
         });
@@ -327,9 +388,9 @@ module.exports = {
         .setColor("Red")
         .setTimestamp();
 
-        await interaction.deferReply({
-          ephemeral: true,
-        })
+      await interaction.deferReply({
+        ephemeral: true,
+      });
 
       await user
         .send({
@@ -374,45 +435,82 @@ module.exports = {
         ephemeral: true,
       });
 
-      const modSys = await modSchema.findOne({ guildId: interaction.guild.id });
-
       if (modSys.channelId) {
         const channel = interaction.guild.channels.cache.get(modSys.channelId);
 
-        if (channel) {
-          channel.send({
+        if (
+          !interaction.guild.members.me
+            .permissionsIn(modSys.channelId)
+            .has(["EmbedLinks", "SendMessages", "ViewChannel"])
+        ) {
+          interaction.user.send({
             embeds: [
               new EmbedBuilder()
-                .setColor("Red")
-                .setTitle(`${member.user.username} has been banned!`)
+                .setDescription(
+                  "I do not have permissions to access that channel.\nPlease add me to the channel and give me permissions!"
+                )
                 .addFields(
                   {
-                    name: "Banned User",
-                    value: user.tag,
-                    inline: true,
+                    name: "Channel:",
+                    value: `<${modSys.channelId}>`,
                   },
                   {
-                    name: "Banned User ID",
-                    value: user.id,
-                    inline: true,
-                  },
-                  {
-                    name: "Banned by",
-                    value: interaction.member.user.tag,
-                    inline: true,
-                  },
-                  {
-                    name: "Banned At",
-                    value: new Date().toLocaleString(),
-                    inline: true,
-                  },
-                  {
-                    name: "Reason",
-                    value: `\`\`\`${reason || "No reason provided"}\`\`\``,
+                    name: "Required Permissions",
+                    value: "`EmbedLinks, ViewChannel, and SendMessages`",
                   }
                 ),
             ],
           });
+
+          await interaction.followUp({
+            content: "Message not sent in logs channel because of an error.",
+            ephemeral: true,
+          });
+          return;
+        }
+         if (modSys.channelId &&
+          interaction.guild.members.me
+            .permissionsIn(modSys.channelId)
+            .has(["EmbedLinks", "SendMessages", "ViewChannel"])) {
+          const channel = interaction.guild.channels.cache.get(
+            modSys.channelId
+          );
+
+          if (channel) {
+            channel.send({
+              embeds: [
+                new EmbedBuilder()
+                  .setColor("Red")
+                  .setTitle(`${member.user.username} has been kicked!`)
+                  .addFields(
+                    {
+                      name: "Kicked User",
+                      value: user.tag,
+                      inline: true,
+                    },
+                    {
+                      name: "Kicked User ID",
+                      value: user.id,
+                      inline: true,
+                    },
+                    {
+                      name: "Kicked by",
+                      value: interaction.member.user.tag,
+                      inline: true,
+                    },
+                    {
+                      name: "Kicked At",
+                      value: new Date().toLocaleString(),
+                      inline: true,
+                    },
+                    {
+                      name: "Reason",
+                      value: `\`\`\`${reason || "No reason provided"}\`\`\``,
+                    }
+                  ),
+              ],
+            });
+          }
         }
       }
     }
@@ -490,8 +588,8 @@ module.exports = {
 
       await interaction.deferReply({
         ephemeral: true,
-      })
-      
+      });
+
       user
         .send({
           embeds: [
@@ -564,7 +662,42 @@ module.exports = {
 
       const modSys = await modSchema.findOne({ guildId: interaction.guild.id });
 
-      if (modSys.channelId) {
+      if (
+        !interaction.guild.members.me
+          .permissionsIn(modSys.channelId)
+          .has(["EmbedLinks", "SendMessages", "ViewChannel"])
+      ) {
+        interaction.user.send({
+          embeds: [
+            new EmbedBuilder()
+              .setDescription(
+                "I do not have permissions to access that channel.\nPlease add me to the channel and give me permissions!"
+              )
+              .addFields(
+                {
+                  name: "Channel:",
+                  value: `<${modSys.channelId}>`,
+                },
+                {
+                  name: "Required Permissions",
+                  value: "`EmbedLinks, ViewChannel, and SendMessages`",
+                }
+              ),
+          ],
+        });
+
+        interaction.followUp({
+          content: "Message not sent in logs channel because of an error.",
+          ephemeral: true,
+        });
+        return;
+      }
+      if (
+        modSys.channelId &&
+        interaction.guild.members.me
+          .permissionsIn(modSys.channelId)
+          .has(["EmbedLinks", "SendMessages", "ViewChannel"])
+      ) {
         const channel = interaction.guild.channels.cache.get(modSys.channelId);
 
         if (channel) {
@@ -572,31 +705,27 @@ module.exports = {
             embeds: [
               new EmbedBuilder()
                 .setColor("Red")
-                .setTitle(`${member.user.username} has been timed out!`)
+                .setTitle(`${member.user.username} has been kicked!`)
                 .addFields(
                   {
-                    name: "Timed Out User",
+                    name: "Kicked User",
                     value: user.tag,
                     inline: true,
                   },
                   {
-                    name: "Timed Out User ID",
+                    name: "Kicked User ID",
                     value: user.id,
                     inline: true,
                   },
                   {
-                    name: "Timed Out by",
+                    name: "Kicked by",
                     value: interaction.member.user.tag,
                     inline: true,
                   },
                   {
-                    name: "Timed Out At",
+                    name: "Kicked At",
                     value: new Date().toLocaleString(),
                     inline: true,
-                  },
-                  {
-                    name: "Timeout Duration",
-                    value: `${time || "`♾️`"} minutes`,
                   },
                   {
                     name: "Reason",
