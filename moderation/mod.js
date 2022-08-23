@@ -708,22 +708,22 @@ module.exports = {
                 .setTitle(`${member.user.username} has been kicked!`)
                 .addFields(
                   {
-                    name: "Kicked User",
+                    name: "Timeouted User",
                     value: user.tag,
                     inline: true,
                   },
                   {
-                    name: "Kicked User ID",
+                    name: "Timeouted User ID",
                     value: user.id,
                     inline: true,
                   },
                   {
-                    name: "Kicked by",
+                    name: "Timeouted by",
                     value: interaction.member.user.tag,
                     inline: true,
                   },
                   {
-                    name: "Kicked At",
+                    name: "Timeouted At",
                     value: new Date().toLocaleString(),
                     inline: true,
                   },
